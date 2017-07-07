@@ -17,14 +17,11 @@ class Bora
         if !uri.query.nil? && uri.query.include?('owner')
           query = URI.decode_www_form(uri.query).to_h
           owners = query['owner'].split(',')
-        else
-          owners << 'self'
         end
 
         ec2 = Aws::EC2::Client.new(region: @stack.region)
         begin
-          images = ec2.describe_images(
-            owners: owners,
+          options = {
             filters: [
               {
                 name:   'name',
@@ -35,7 +32,9 @@ class Bora
                 values: ['available']
               }
             ]
-          ).images
+          }
+          options[:owners] = owners if owners
+          images = ec2.describe_images(options).images
         rescue Aws::EC2::Errors::InvalidUserIDMalformed
           raise InvalidUserId, "Invalid owner argument in #{uri}"
         end
