@@ -33,7 +33,7 @@ class Bora
               }
             ]
           }
-          options[:owners] = owners if owners
+          options[:owners] = owners unless owners.empty?
           images = ec2.describe_images(options).images
         rescue Aws::EC2::Errors::InvalidUserIDMalformed
           raise InvalidUserId, "Invalid owner argument in #{uri}"
